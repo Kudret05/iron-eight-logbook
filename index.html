@@ -1,48 +1,51 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Iron Eight Logbook</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Cpath d=%22M6 58V48h10V38h10V28L36 8l22 50z%22 fill=%22%23FF5A1F%22/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: a training logbook. Summary strip on top, then week rail → day tabs → set sheets. Phase colors borrow competition plate colors. */
+/* Layout: a training logbook in the ascend brand. Summary strip on top, then week rail, day tabs, set sheets. Phase colors climb from glacier to ember. */
 :root {
-  --bg: #eef0f2;
+  --bg: #F2F5F6;          /* Snowfield */
   --surface: #ffffff;
-  --ink: #16191d;
-  --muted: #5d6670;
-  --line: #d5dae0;
-  --chalk: #f6f7f8;
-  --accent: #d23a2b;      /* 25 kg red plate */
-  --ph-build: #2b6fd2;    /* 20 kg blue: hypertrophy */
-  --ph-deload: #3f9a5a;   /* 10 kg green: deload */
-  --ph-strength: #d23a2b; /* 25 kg red: strength */
-  --ph-peak: #d9a514;     /* 15 kg yellow: peak */
-  --done: #2f8a4f;
-  --done-bg: #e3f3e8;
-  --f-display: "Saira Condensed", "Arial Narrow", sans-serif;
-  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --ink: #14181C;         /* Basalt */
+  --muted: #5B6670;       /* Scree */
+  --line: #D7DEE2;
+  --chalk: #F2F5F6;
+  --accent: #FF5A1F;      /* Summit Ember */
+  --on-accent: #14181C;
+  --ph-build: #4D8AA3;    /* deep glacier: hypertrophy */
+  --ph-deload: #9CC3D1;   /* glacier: deload */
+  --ph-strength: #FF5A1F; /* ember: strength */
+  --ph-peak: #B7832F;     /* felt: peak */
+  --done: #2F8A4F;
+  --done-bg: #E3F3E8;
+  --f-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body: "Instrument Sans", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #121417; --surface: #1b1e23; --ink: #e9ecef; --muted: #98a2ad; --line: #2c3138; --chalk: #23272d;
-  --accent: #ef5a4a; --ph-build: #5b94ec; --ph-deload: #5dbb78; --ph-strength: #ef5a4a; --ph-peak: #e9bd3a;
-  --done: #5dbb78; --done-bg: #1d3325; color-scheme: dark } }
+  --bg: #14181C; --surface: #1C2227; --ink: #F2F5F6; --muted: #9AA6AF; --line: #2E363D; --chalk: #232A30;
+  --accent: #FF6A33; --on-accent: #14181C; --ph-build: #6FA7BE; --ph-deload: #BFD8E2; --ph-strength: #FF6A33; --ph-peak: #D19B45;
+  --done: #5DBB78; --done-bg: #1D3325; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #121417; --surface: #1b1e23; --ink: #e9ecef; --muted: #98a2ad; --line: #2c3138; --chalk: #23272d;
-  --accent: #ef5a4a; --ph-build: #5b94ec; --ph-deload: #5dbb78; --ph-strength: #ef5a4a; --ph-peak: #e9bd3a;
-  --done: #5dbb78; --done-bg: #1d3325; color-scheme: dark }
+  --bg: #14181C; --surface: #1C2227; --ink: #F2F5F6; --muted: #9AA6AF; --line: #2E363D; --chalk: #232A30;
+  --accent: #FF6A33; --on-accent: #14181C; --ph-build: #6FA7BE; --ph-deload: #BFD8E2; --ph-strength: #FF6A33; --ph-peak: #D19B45;
+  --done: #5DBB78; --done-bg: #1D3325; color-scheme: dark }
 
 * { box-sizing: border-box }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
 .wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 64px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: grid; gap: 24px; }
-h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: .01em }
-h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; line-height: .95; text-transform: uppercase }
-h2 { font-size: 1.6rem; font-weight: 800; text-transform: uppercase }
-h3 { font-size: 1.25rem; font-weight: 600 }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.02em }
+h1 { font-size: clamp(1.9rem, 6vw, 3.1rem); font-weight: 700; line-height: 1; letter-spacing: -0.04em }
+h2 { font-size: 1.35rem; font-weight: 700 }
+h3 { font-size: 1.05rem; font-weight: 700 }
 .eyebrow { font: 600 .72rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
 .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums }
+.brandline { display: flex; align-items: center; gap: 8px; margin-bottom: 10px }
 header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between }
 header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
 .sync { font: .75rem var(--f-mono); color: var(--muted); display: flex; align-items: center; gap: 6px }
@@ -53,7 +56,7 @@ header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
 /* Summary */
 .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
 .stat { background: var(--surface); padding: 14px 16px; display: grid; gap: 4px; min-width: 0 }
-.stat b { font: 800 2rem/1 var(--f-display); font-variant-numeric: tabular-nums }
+.stat b { font: 700 1.7rem/1 var(--f-display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums }
 .stat small { color: var(--muted); font-size: .8rem }
 .bar { height: 6px; background: var(--chalk); border-radius: 3px; overflow: hidden }
 .bar > span { display: block; height: 100%; background: var(--accent); transition: width .3s }
@@ -64,7 +67,7 @@ header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
 .wk { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 8px 6px 10px; cursor: pointer; text-align: left; display: grid; gap: 6px; font: inherit; min-width: 0; border-top: 4px solid var(--ph) }
 .wk:hover { border-color: var(--ph) }
 .wk[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); border-top-color: var(--ph) }
-.wk .n { font: 800 1.3rem/1 var(--f-display) }
+.wk .n { font: 700 1.1rem/1 var(--f-display); letter-spacing: -0.03em }
 .wk .ph { font: .62rem/1.1 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; opacity: .75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .pips { display: flex; gap: 3px }
 .pips i { flex: 1; height: 5px; border-radius: 2px; background: var(--line) }
@@ -78,9 +81,9 @@ header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
 /* Day tabs */
 .days { display: flex; gap: 6px; flex-wrap: wrap }
 .day { appearance: none; font: 600 .9rem var(--f-body); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: flex; gap: 8px; align-items: center }
-.day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff }
+.day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
 .day .ck { font-size: .8rem; color: var(--done) }
-.day[aria-pressed="true"] .ck { color: #fff }
+.day[aria-pressed="true"] .ck { color: var(--on-accent) }
 
 /* Session */
 .session { display: grid; gap: 14px }
@@ -104,7 +107,7 @@ header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
 
 .finish { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px dashed var(--line); border-radius: 6px }
 .finish textarea { flex: 1 1 280px; min-width: 0; min-height: 2.6rem; font: .9rem var(--f-body); padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--chalk); color: var(--ink); resize: vertical }
-.btn { appearance: none; font: 700 1rem var(--f-display); text-transform: uppercase; letter-spacing: .06em; padding: 10px 18px; border-radius: 4px; border: none; background: var(--ink); color: var(--bg); cursor: pointer }
+.btn { appearance: none; font: 700 .9rem var(--f-display); letter-spacing: -0.01em; padding: 10px 18px; border-radius: 4px; border: none; background: var(--ink); color: var(--bg); cursor: pointer }
 .btn.done { background: var(--done); color: #fff }
 
 /* Progress chart */
@@ -114,7 +117,7 @@ header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
 .lifts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }
 .lift { display: grid; gap: 4px; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 4px }
 .lift .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
-.lift .val { font: 800 1.5rem/1 var(--f-display); font-variant-numeric: tabular-nums }
+.lift .val { font: 700 1.3rem/1 var(--f-display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums }
 .lift .delta { font: .75rem var(--f-mono); color: var(--done) }
 .lift svg { width: 100%; height: 56px; display: block }
 .lift .empty { font-size: .78rem; color: var(--muted); height: 56px; display: flex; align-items: center }
@@ -127,7 +130,7 @@ footer button { appearance: none; background: none; border: none; color: var(--m
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">8-week upper / lower block · 4 days a week</div>
+      <div class="eyebrow brandline"><svg viewBox="0 0 64 64" width="14" height="14" aria-hidden="true"><path d="M6 58V48h10V38h10V28L36 8l22 50z" fill="var(--accent)"/></svg>by ascend · 8-week upper / lower block · 4 days a week</div>
       <h1>Iron Eight Logbook</h1>
       <p>Log the weight and reps for every set and tick it off. Last week's numbers show as a hint so you know what to beat.</p>
     </div>
