@@ -1,0 +1,431 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Iron Eight Logbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a training logbook. Summary strip on top, then week rail → day tabs → set sheets. Phase colors borrow competition plate colors. */
+:root {
+  --bg: #eef0f2;
+  --surface: #ffffff;
+  --ink: #16191d;
+  --muted: #5d6670;
+  --line: #d5dae0;
+  --chalk: #f6f7f8;
+  --accent: #d23a2b;      /* 25 kg red plate */
+  --ph-build: #2b6fd2;    /* 20 kg blue: hypertrophy */
+  --ph-deload: #3f9a5a;   /* 10 kg green: deload */
+  --ph-strength: #d23a2b; /* 25 kg red: strength */
+  --ph-peak: #d9a514;     /* 15 kg yellow: peak */
+  --done: #2f8a4f;
+  --done-bg: #e3f3e8;
+  --f-display: "Saira Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121417; --surface: #1b1e23; --ink: #e9ecef; --muted: #98a2ad; --line: #2c3138; --chalk: #23272d;
+  --accent: #ef5a4a; --ph-build: #5b94ec; --ph-deload: #5dbb78; --ph-strength: #ef5a4a; --ph-peak: #e9bd3a;
+  --done: #5dbb78; --done-bg: #1d3325; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121417; --surface: #1b1e23; --ink: #e9ecef; --muted: #98a2ad; --line: #2c3138; --chalk: #23272d;
+  --accent: #ef5a4a; --ph-build: #5b94ec; --ph-deload: #5dbb78; --ph-strength: #ef5a4a; --ph-peak: #e9bd3a;
+  --done: #5dbb78; --done-bg: #1d3325; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 24px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: .01em }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; line-height: .95; text-transform: uppercase }
+h2 { font-size: 1.6rem; font-weight: 800; text-transform: uppercase }
+h3 { font-size: 1.25rem; font-weight: 600 }
+.eyebrow { font: 600 .72rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums }
+header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between }
+header p { margin: 8px 0 0; color: var(--muted); max-width: 60ch }
+.sync { font: .75rem var(--f-mono); color: var(--muted); display: flex; align-items: center; gap: 6px }
+.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block }
+.sync[data-s="cloud"] i { background: var(--done) }
+.sync[data-s="saving"] i { background: var(--ph-peak) }
+
+/* Summary */
+.summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden }
+.stat { background: var(--surface); padding: 14px 16px; display: grid; gap: 4px; min-width: 0 }
+.stat b { font: 800 2rem/1 var(--f-display); font-variant-numeric: tabular-nums }
+.stat small { color: var(--muted); font-size: .8rem }
+.bar { height: 6px; background: var(--chalk); border-radius: 3px; overflow: hidden }
+.bar > span { display: block; height: 100%; background: var(--accent); transition: width .3s }
+@media (max-width: 640px) { .summary { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+
+/* Week rail */
+.rail { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px }
+.wk { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 8px 6px 10px; cursor: pointer; text-align: left; display: grid; gap: 6px; font: inherit; min-width: 0; border-top: 4px solid var(--ph) }
+.wk:hover { border-color: var(--ph) }
+.wk[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); border-top-color: var(--ph) }
+.wk .n { font: 800 1.3rem/1 var(--f-display) }
+.wk .ph { font: .62rem/1.1 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; opacity: .75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.pips { display: flex; gap: 3px }
+.pips i { flex: 1; height: 5px; border-radius: 2px; background: var(--line) }
+.pips i.on { background: var(--done) }
+.wk[aria-pressed="true"] .pips i:not(.on) { background: color-mix(in srgb, var(--bg) 30%, transparent) }
+@media (max-width: 560px) { .rail { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+
+.phase-note { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--ph); border-radius: 0 6px 6px 0 }
+.phase-note p { margin: 0; color: var(--muted); flex: 1 1 320px; min-width: 0 }
+
+/* Day tabs */
+.days { display: flex; gap: 6px; flex-wrap: wrap }
+.day { appearance: none; font: 600 .9rem var(--f-body); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: flex; gap: 8px; align-items: center }
+.day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff }
+.day .ck { font-size: .8rem; color: var(--done) }
+.day[aria-pressed="true"] .ck { color: #fff }
+
+/* Session */
+.session { display: grid; gap: 14px }
+.ex { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0 }
+.ex-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; align-items: baseline }
+.ex-head .rx { font: .8rem var(--f-mono); color: var(--muted) }
+.ex .cue { margin: 0; font-size: .85rem; color: var(--muted) }
+.tag { font: 600 .62rem/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: 3px 6px; border-radius: 3px; background: var(--chalk); color: var(--muted); margin-left: 8px; vertical-align: middle }
+.sets { display: grid; gap: 6px }
+.set { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 2.6rem; gap: 8px; align-items: center; padding: 4px; border-radius: 6px }
+.set.hd { font: .65rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-block: 0 }
+.set.is-done { background: var(--done-bg) }
+.set .idx { font: 600 .85rem var(--f-mono); text-align: center; color: var(--muted) }
+.set .prev { font: .8rem var(--f-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.set input { width: 100%; min-width: 0; font: 600 1rem var(--f-mono); font-variant-numeric: tabular-nums; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--chalk); color: var(--ink) }
+.set input::placeholder { color: var(--muted); font-weight: 400; opacity: .7 }
+.set input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.tick { appearance: none; width: 2.6rem; height: 2.4rem; border-radius: 4px; border: 1.5px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; font: 700 1.1rem var(--f-body) }
+.tick:hover { border-color: var(--done); color: var(--done) }
+.tick[aria-pressed="true"] { background: var(--done); border-color: var(--done); color: #fff }
+
+.finish { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px dashed var(--line); border-radius: 6px }
+.finish textarea { flex: 1 1 280px; min-width: 0; min-height: 2.6rem; font: .9rem var(--f-body); padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--chalk); color: var(--ink); resize: vertical }
+.btn { appearance: none; font: 700 1rem var(--f-display); text-transform: uppercase; letter-spacing: .06em; padding: 10px 18px; border-radius: 4px; border: none; background: var(--ink); color: var(--bg); cursor: pointer }
+.btn.done { background: var(--done); color: #fff }
+
+/* Progress chart */
+.progress { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 12px }
+.progress-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline }
+.progress-head p { margin: 0; color: var(--muted); font-size: .85rem }
+.lifts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }
+.lift { display: grid; gap: 4px; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 4px }
+.lift .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+.lift .val { font: 800 1.5rem/1 var(--f-display); font-variant-numeric: tabular-nums }
+.lift .delta { font: .75rem var(--f-mono); color: var(--done) }
+.lift svg { width: 100%; height: 56px; display: block }
+.lift .empty { font-size: .78rem; color: var(--muted); height: 56px; display: flex; align-items: center }
+@media (max-width: 760px) { .lifts { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+footer { color: var(--muted); font-size: .8rem; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between }
+footer button { appearance: none; background: none; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; padding: 0 }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">8-week upper / lower block · 4 days a week</div>
+      <h1>Iron Eight Logbook</h1>
+      <p>Log the weight and reps for every set and tick it off. Last week's numbers show as a hint so you know what to beat.</p>
+    </div>
+    <div class="sync" id="sync" data-s="local"><i></i><span>Saved on this device</span></div>
+  </header>
+
+  <section class="summary" aria-label="Overall progress">
+    <div class="stat"><span class="eyebrow">Block done</span><b id="s-pct">0%</b><div class="bar"><span id="s-bar" style="width:0%"></span></div></div>
+    <div class="stat"><span class="eyebrow">Sessions</span><b id="s-sess">0/32</b><small id="s-sess-sub">None finished yet</small></div>
+    <div class="stat"><span class="eyebrow">Sets ticked</span><b id="s-sets">0</b><small id="s-sets-sub">of 0 planned</small></div>
+    <div class="stat"><span class="eyebrow">Total volume</span><b id="s-vol">0</b><small>kg moved (weight × reps)</small></div>
+  </section>
+
+  <nav class="rail" id="rail" aria-label="Weeks"></nav>
+  <div class="phase-note" id="phase"></div>
+  <div class="days" id="days" role="group" aria-label="Training day"></div>
+  <section class="session" id="session"></section>
+
+  <section class="progress" aria-label="Strength progress">
+    <div class="progress-head">
+      <h2>Strength trend</h2>
+      <p>Best estimated 1-rep max per week, Epley formula: kg × (1 + reps ÷ 30)</p>
+    </div>
+    <div class="lifts" id="lifts"></div>
+  </section>
+
+  <footer>
+    <span>Warm up 5–10 min before each session. Rest 2–3 min on main lifts, 60–90 s on accessories. RPE = how hard the set felt out of 10.</span>
+    <span><button type="button" id="reset">Clear this session's log</button><span id="reset-confirm" hidden> · Sure? <button type="button" id="reset-yes">Yes, clear it</button> <button type="button" id="reset-no">Keep it</button></span></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // ---------- Program ----------
+  const PHASES = [
+    { name: "Build", weeks: [1,2,3], color: "--ph-build", note: "Hypertrophy. Moderate weights, higher reps. Leave 2–3 reps in the tank. Add 2.5 kg when you hit the top of the rep range on every set." },
+    { name: "Deload", weeks: [4], color: "--ph-deload", note: "Recovery week. Use about 60% of week 3 weights and fewer sets. It should feel easy. That is the point." },
+    { name: "Strength", weeks: [5,6,7], color: "--ph-strength", note: "Heavier, lower reps on the main lifts. Add 2.5–5 kg each week on the first lift of the day if form holds." },
+    { name: "Peak", weeks: [8], color: "--ph-peak", note: "Peak week. Heavy triples on the main lifts at RPE 9, light accessories. Your e1RM here is your new baseline." },
+  ];
+  const phaseOf = w => PHASES.find(p => p.weeks.includes(w));
+
+  // sets × reps @ RPE by role and week
+  const SCHEME = {
+    main:   { 1:[3,10,7], 2:[4,8,7], 3:[4,8,8], 4:[3,8,6], 5:[4,6,8], 6:[5,5,8], 7:[5,3,8.5], 8:[3,3,9] },
+    second: { 1:[3,10,7], 2:[3,10,8], 3:[4,10,8], 4:[2,8,6], 5:[4,8,8], 6:[4,8,8], 7:[4,6,8], 8:[3,6,7] },
+    acc:    { 1:[3,12,7], 2:[3,12,8], 3:[4,12,8], 4:[2,12,6], 5:[3,10,8], 6:[3,10,8], 7:[3,10,9], 8:[2,10,7] },
+  };
+  const DAYS = [
+    { key: "A", name: "Upper · Push", ex: [
+      ["bench", "Bench Press", "main", "Shoulder blades pinched, bar to lower chest, feet planted."],
+      ["ohp", "Overhead Press", "second", "Squeeze glutes, press straight up, head through at the top."],
+      ["incdb", "Incline Dumbbell Press", "acc", "30° bench, control the lowering for 2 s."],
+      ["lat", "Lateral Raise", "acc", "Lead with the elbows, stop at shoulder height."],
+      ["tri", "Triceps Rope Pushdown", "acc", "Elbows pinned, spread the rope at the bottom."] ] },
+    { key: "B", name: "Lower · Squat", ex: [
+      ["squat", "Back Squat", "main", "Brace before you descend, hips to at least parallel."],
+      ["rdl", "Romanian Deadlift", "second", "Soft knees, push hips back until hamstrings stretch."],
+      ["press", "Leg Press", "acc", "Full range without the lower back lifting off the pad."],
+      ["curl", "Lying Leg Curl", "acc", "Pause 1 s at full contraction."],
+      ["calf", "Standing Calf Raise", "acc", "Full stretch at the bottom, 1 s hold at the top."] ] },
+    { key: "C", name: "Upper · Pull", ex: [
+      ["row", "Barbell Row", "main", "Torso about 45°, pull to the belly button."],
+      ["pull", "Pull-up (add weight when easy)", "second", "Dead hang to chin over bar. Log added kg, 0 for bodyweight."],
+      ["cable", "Seated Cable Row", "acc", "Chest up, squeeze shoulder blades together."],
+      ["face", "Face Pull", "acc", "Pull to forehead, rotate thumbs back."],
+      ["bicep", "EZ-Bar Curl", "acc", "No swinging. Lower slowly."] ] },
+    { key: "D", name: "Lower · Hinge", ex: [
+      ["dead", "Deadlift", "main", "Bar over midfoot, push the floor away, lock out with glutes."],
+      ["front", "Front Squat", "second", "Elbows high, stay upright."],
+      ["split", "Bulgarian Split Squat", "acc", "Reps are per leg. Log the weight of one dumbbell."],
+      ["thrust", "Barbell Hip Thrust", "acc", "Chin tucked, full hip lockout."],
+      ["leg", "Hanging Leg Raise", "acc", "Curl the pelvis up, no swinging. Log 0 kg."] ] },
+  ];
+  const MAIN_LIFTS = [["bench","Bench Press"],["squat","Back Squat"],["row","Barbell Row"],["dead","Deadlift"]];
+  const rx = (role, w) => SCHEME[role][w];
+  const wkey = (w, d) => `w${w}${DAYS[d].key}`;
+
+  // ---------- State ----------
+  // log[wkey] = { sets: { "<exId>:<i>": {kg, reps, done} }, complete: bool, note: str }
+  let log = {};
+  let view = { w: 1, d: 0 };
+  try { const v = JSON.parse(localStorage.getItem("ie8-view") || "null"); if (v && v.w >= 1 && v.w <= 8 && v.d >= 0 && v.d < 4) view = v; } catch {}
+  try { log = JSON.parse(localStorage.getItem("ie8-log") || "{}") || {}; } catch {}
+
+  let db = null, col = null;
+  const dirty = new Set(), timers = {}, inflight = {};
+  const syncEl = document.getElementById("sync");
+  const setSync = (s, t) => { syncEl.dataset.s = s; syncEl.querySelector("span").textContent = t; };
+
+  const saveLocal = () => { try { localStorage.setItem("ie8-log", JSON.stringify(log)); } catch {} };
+  function persist(k) {
+    saveLocal();
+    if (!col) return;
+    dirty.add(k);
+    clearTimeout(timers[k]);
+    setSync("saving", "Saving…");
+    timers[k] = setTimeout(() => flush(k), 600);
+  }
+  async function flush(k) {
+    if (inflight[k]) { timers[k] = setTimeout(() => flush(k), 300); return; }
+    inflight[k] = true;
+    const body = JSON.parse(JSON.stringify(log[k] || {}));
+    try {
+      await col.doc(k).set(body);
+      if (JSON.stringify(log[k] || {}) === JSON.stringify(body)) dirty.delete(k);
+      if (!dirty.size) setSync("cloud", "Saved to your account");
+    } catch (e) {
+      setSync("local", e && e.code === "permission_denied" ? "Saved on this device only (no write access)" : "Couldn't reach your account. Saved on this device");
+    } finally { inflight[k] = false; }
+  }
+
+  const entry = k => (log[k] ||= { sets: {}, complete: false, note: "" });
+  const e1rm = (kg, reps) => kg > 0 && reps > 0 ? kg * (1 + reps / 30) : 0;
+  const fmt = n => Math.round(n).toLocaleString("en-US");
+
+  // ---------- Render ----------
+  const $ = id => document.getElementById(id);
+  function plannedSets(d, w) { return DAYS[d].ex.reduce((a, e) => a + rx(e[2], w)[0], 0); }
+
+  function renderSummary() {
+    let planned = 0, ticked = 0, vol = 0, sess = 0;
+    for (let w = 1; w <= 8; w++) for (let d = 0; d < 4; d++) {
+      const k = wkey(w, d), L = log[k];
+      planned += plannedSets(d, w);
+      if (!L) continue;
+      if (L.complete) sess++;
+      DAYS[d].ex.forEach(e => { for (let i = 0; i < rx(e[2], w)[0]; i++) {
+        const s = L.sets[`${e[0]}:${i}`]; if (s && s.done) { ticked++; vol += (+s.kg || 0) * (+s.reps || 0); }
+      }});
+    }
+    const pct = planned ? Math.round(ticked / planned * 100) : 0;
+    $("s-pct").textContent = pct + "%";
+    $("s-bar").style.width = pct + "%";
+    $("s-sess").textContent = `${sess}/32`;
+    $("s-sess-sub").textContent = sess === 0 ? "None finished yet" : sess === 32 ? "Block complete" : `${32 - sess} to go`;
+    $("s-sets").textContent = fmt(ticked);
+    $("s-sets-sub").textContent = `of ${fmt(planned)} planned`;
+    $("s-vol").textContent = fmt(vol);
+  }
+
+  function renderRail() {
+    $("rail").innerHTML = Array.from({ length: 8 }, (_, i) => {
+      const w = i + 1, p = phaseOf(w);
+      const pips = DAYS.map((_, d) => `<i class="${log[wkey(w, d)]?.complete ? "on" : ""}"></i>`).join("");
+      return `<button type="button" class="wk" style="--ph:var(${p.color})" data-w="${w}" aria-pressed="${w === view.w}">
+        <span class="n">W${w}</span><span class="ph">${p.name}</span><span class="pips">${pips}</span></button>`;
+    }).join("");
+    const p = phaseOf(view.w);
+    $("phase").style.setProperty("--ph", `var(${p.color})`);
+    $("phase").innerHTML = `<h3>Week ${view.w} · ${p.name}</h3><p>${p.note}</p>`;
+    $("days").innerHTML = DAYS.map((d, i) => `<button type="button" class="day" data-d="${i}" aria-pressed="${i === view.d}">
+      Day ${d.key} · ${d.name}${log[wkey(view.w, i)]?.complete ? '<span class="ck">✓</span>' : ""}</button>`).join("");
+  }
+
+  function prevSet(exId, i) {
+    for (let w = view.w - 1; w >= 1; w--) {
+      const s = log[wkey(w, view.d)]?.sets[`${exId}:${i}`] || log[wkey(w, view.d)]?.sets[`${exId}:0`];
+      if (s && (s.kg || s.reps)) return { w, ...s };
+    }
+    return null;
+  }
+
+  function renderSession() {
+    const k = wkey(view.w, view.d), L = log[k] || { sets: {}, complete: false, note: "" };
+    const day = DAYS[view.d];
+    const html = day.ex.map(([id, name, role, cue]) => {
+      const [n, reps, rpe] = rx(role, view.w);
+      const rows = Array.from({ length: n }, (_, i) => {
+        const s = L.sets[`${id}:${i}`] || {};
+        const pv = prevSet(id, i);
+        return `<div class="set${s.done ? " is-done" : ""}">
+          <span class="idx">${i + 1}</span>
+          <span class="prev" title="Last logged">${pv ? `${pv.kg || 0}×${pv.reps || 0} <span style="opacity:.6">W${pv.w}</span>` : "—"}</span>
+          <input id="kg-${k}-${id}-${i}" inputmode="decimal" aria-label="${name} set ${i + 1} weight in kg" placeholder="${pv?.kg ?? "kg"}" value="${s.kg ?? ""}" data-f="kg" data-s="${id}:${i}">
+          <input id="rp-${k}-${id}-${i}" inputmode="numeric" aria-label="${name} set ${i + 1} reps" placeholder="${reps}" value="${s.reps ?? ""}" data-f="reps" data-s="${id}:${i}">
+          <button type="button" class="tick" aria-label="Mark set ${i + 1} done" aria-pressed="${!!s.done}" data-tick="${id}:${i}" data-r="${reps}">✓</button>
+        </div>`;
+      }).join("");
+      const tag = role === "main" ? "Main lift" : role === "second" ? "Secondary" : "";
+      return `<article class="ex">
+        <div class="ex-head"><h3>${name}${tag ? `<span class="tag">${tag}</span>` : ""}</h3><span class="rx">${n} × ${reps} @ RPE ${rpe}</span></div>
+        <p class="cue">${cue}</p>
+        <div class="sets"><div class="set hd"><span>Set</span><span>Last</span><span>kg</span><span>Reps</span><span></span></div>${rows}</div>
+      </article>`;
+    }).join("");
+    $("session").innerHTML = html + `<div class="finish">
+      <textarea id="note-${k}" placeholder="Session notes: sleep, how it felt, pain, PRs…" aria-label="Session notes" data-note="1">${(L.note || "").replace(/</g, "&lt;")}</textarea>
+      <button type="button" class="btn${L.complete ? " done" : ""}" id="complete">${L.complete ? "✓ Session complete" : "Mark session complete"}</button>
+    </div>`;
+  }
+
+  function renderLifts() {
+    $("lifts").innerHTML = MAIN_LIFTS.map(([id, name]) => {
+      const d = DAYS.findIndex(x => x.ex.some(e => e[0] === id));
+      const pts = [];
+      for (let w = 1; w <= 8; w++) {
+        const L = log[wkey(w, d)]; let best = 0;
+        if (L) for (const [sk, s] of Object.entries(L.sets)) if (sk.startsWith(id + ":") && s.done) best = Math.max(best, e1rm(+s.kg, +s.reps));
+        if (best) pts.push([w, best]);
+      }
+      if (!pts.length) return `<div class="lift"><div class="top"><span class="eyebrow">${name}</span></div><span class="val">—</span><div class="empty">Tick a set to start the trend</div></div>`;
+      const last = pts[pts.length - 1][1], first = pts[0][1];
+      const vals = pts.map(p => p[1]), lo = Math.min(...vals) * 0.97, hi = Math.max(...vals) * 1.03;
+      const W = 160, H = 56, pad = 5;
+      const x = w => pad + (w - 1) / 7 * (W - pad * 2), y = v => H - pad - (hi === lo ? 0.5 : (v - lo) / (hi - lo)) * (H - pad * 2);
+      const line = pts.map(p => `${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(" ");
+      const area = `${x(pts[0][0]).toFixed(1)},${H - pad} ${line} ${x(pts[pts.length - 1][0]).toFixed(1)},${H - pad}`;
+      const grid = [1,2,3,4,5,6,7,8].map(w => `<line x1="${x(w)}" x2="${x(w)}" y1="${pad}" y2="${H - pad}" stroke="var(--line)" stroke-width="1"/>`).join("");
+      const lp = pts[pts.length - 1];
+      const diff = last - first;
+      return `<div class="lift"><div class="top"><span class="eyebrow">${name}</span>${pts.length > 1 ? `<span class="delta">${diff >= 0 ? "+" : ""}${diff.toFixed(1)} kg</span>` : ""}</div>
+        <span class="val">${last.toFixed(1)}<span style="font-size:.9rem;color:var(--muted)"> kg</span></span>
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${name} estimated 1RM over weeks ${pts.map(p => `W${p[0]} ${p[1].toFixed(1)} kg`).join(", ")}">
+          ${grid}<polygon points="${area}" fill="var(--accent)" fill-opacity=".12"/>
+          <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+          <circle cx="${x(lp[0])}" cy="${y(lp[1])}" r="3.5" fill="var(--accent)"/>
+        </svg></div>`;
+    }).join("");
+  }
+
+  function renderAll() { renderSummary(); renderRail(); renderSession(); renderLifts(); }
+  function renderProgress() { renderSummary(); renderRail(); renderLifts(); }
+
+  // ---------- Events ----------
+  document.addEventListener("click", ev => {
+    const t = ev.target.closest("button"); if (!t) return;
+    if (t.dataset.w) { view.w = +t.dataset.w; saveView(); renderRail(); renderSession(); return; }
+    if (t.dataset.d) { view.d = +t.dataset.d; saveView(); renderRail(); renderSession(); return; }
+    const k = wkey(view.w, view.d);
+    if (t.dataset.tick) {
+      const L = entry(k), s = (L.sets[t.dataset.tick] ||= {});
+      s.done = !s.done;
+      // Fill blanks from the hint so one tap logs a set
+      const [exId, i] = t.dataset.tick.split(":");
+      const pv = prevSet(exId, +i);
+      if (s.done && (s.reps === undefined || s.reps === "")) s.reps = +t.dataset.r;
+      if (s.done && (s.kg === undefined || s.kg === "") && pv?.kg) s.kg = pv.kg;
+      persist(k);
+      const row = t.closest(".set");
+      row.classList.toggle("is-done", s.done);
+      t.setAttribute("aria-pressed", s.done);
+      row.querySelector('[data-f="kg"]').value = s.kg ?? "";
+      row.querySelector('[data-f="reps"]').value = s.reps ?? "";
+      renderProgress();
+      return;
+    }
+    if (t.id === "complete") {
+      const L = entry(k); L.complete = !L.complete; persist(k); renderAll(); return;
+    }
+    if (t.id === "reset") { $("reset-confirm").hidden = false; return; }
+    if (t.id === "reset-no") { $("reset-confirm").hidden = true; return; }
+    if (t.id === "reset-yes") {
+      log[k] = { sets: {}, complete: false, note: "" }; persist(k);
+      $("reset-confirm").hidden = true; renderAll(); return;
+    }
+  });
+  document.addEventListener("input", ev => {
+    const el = ev.target, k = wkey(view.w, view.d);
+    if (el.dataset.s) {
+      const L = entry(k), s = (L.sets[el.dataset.s] ||= {});
+      const v = el.value.replace(",", ".").trim();
+      s[el.dataset.f] = v === "" ? "" : (isNaN(+v) ? s[el.dataset.f] : +v);
+      persist(k);
+      if (s.done) renderProgress();
+    } else if (el.dataset.note) { entry(k).note = el.value.slice(0, 2000); persist(k); }
+  });
+  function saveView() { try { localStorage.setItem("ie8-view", JSON.stringify(view)); } catch {} }
+
+  renderAll();
+
+  // ---------- Account sync ----------
+  (async () => {
+    if (!window.claude?.use) return;
+    try {
+      const [d, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+      const id = user ? await user.id() : null;
+      if (!d || !id) return;
+      db = d; col = db.collection("data/users/" + id);
+      setSync("cloud", "Saved to your account");
+      let first = true;
+      col.onSnapshot(snap => {
+        const remote = {};
+        snap.docs.forEach(doc => { if (/^w[1-8][A-D]$/.test(doc.id)) remote[doc.id] = doc.data(); });
+        if (first) {
+          first = false;
+          // First connect: push anything logged on this device that the account doesn't have yet
+          for (const k of Object.keys(log)) if (!remote[k]) persist(k);
+        }
+        for (const [k, v] of Object.entries(remote)) if (!dirty.has(k) && v) log[k] = { sets: v.sets || {}, complete: !!v.complete, note: v.note || "" };
+        saveLocal();
+        const typing = document.activeElement && $("session").contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+        typing ? renderProgress() : renderAll();
+      }, () => setSync("local", "Couldn't reach your account. Saved on this device"));
+    } catch { /* stay on device storage */ }
+  })();
+})();
+</script>
+
+</body></html>
